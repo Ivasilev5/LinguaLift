@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.compose)
+
 }
 
 android {
-    namespace = "iv.vas.learnwords.data"
+    namespace = "iv.vas.core_ui"
     compileSdk = 36
 
     defaultConfig {
@@ -34,17 +35,15 @@ android {
 }
 
 dependencies {
-    implementation(libs.bundles.room)
-    implementation(libs.bundles.network)
-    implementation(project(":feature:learnwords:domain"))
-    implementation(project(":core"))
-    implementation(libs.bundles.hilt)
-    ksp(libs.bundles.hilt.compiler)
+    implementation(platform(libs.androidx.compose.bom))
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.bundles.compose)
     implementation(libs.material)
-    ksp(libs.bundles.room.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }
