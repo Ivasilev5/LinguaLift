@@ -17,6 +17,8 @@
             <option value="$PROJECT_DIR$/feature/learnwords" />
             <option value="$PROJECT_DIR$/feature/learnwords/data" />
             <option value="$PROJECT_DIR$/feature/learnwords/domain" />
+            <option value="$PROJECT_DIR$/feature/learnwords/navigation-api" />
+            <option value="$PROJECT_DIR$/feature/learnwords/navigation-impl" />
             <option value="$PROJECT_DIR$/feature/learnwords/ui" />
           </set>
         </option>

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.plugin)
 }
 
 android {
@@ -46,6 +47,8 @@ android {
 
 dependencies {
     implementation(project(":core-ui"))
+    implementation(project(":feature:learnwords:navigation-impl"))
+    implementation(project(":feature:learnwords:navigation-api"))
     implementation(libs.splash.screen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -68,4 +71,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+
+hilt {
+    enableAggregatingTask = false
 }

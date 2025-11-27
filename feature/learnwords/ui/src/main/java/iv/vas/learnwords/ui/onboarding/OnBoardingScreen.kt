@@ -32,7 +32,10 @@ import androidx.compose.ui.unit.dp
 import iv.vas.core_ui.theme.LinguaLiftTheme
 import iv.vas.learnwords.ui.R
 @Composable
-fun OnBoardingScreen(modifier: Modifier = Modifier) {
+fun OnBoardingScreen(
+    modifier: Modifier = Modifier,
+    onOnboardingFinished: () -> Unit = {}
+) {
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -90,7 +93,7 @@ fun OnBoardingScreen(modifier: Modifier = Modifier) {
                 Spacer(Modifier.height(40.dp))
 
                 Button(
-                    onClick = { },
+                    onClick = onOnboardingFinished,
 
                     modifier = Modifier
                         .fillMaxWidth()
@@ -149,4 +152,4 @@ fun OnBoardingScreenPreviewDark(
 
 }
 
-
+    
