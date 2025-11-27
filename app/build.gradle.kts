@@ -19,6 +19,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    configurations.all {
+        exclude(group = "com.intellij", module = "annotations")
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -41,7 +45,8 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":core-ui"))
+    implementation(libs.splash.screen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
