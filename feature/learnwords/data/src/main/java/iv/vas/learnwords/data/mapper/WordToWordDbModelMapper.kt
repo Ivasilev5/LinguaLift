@@ -1,0 +1,40 @@
+package iv.vas.learnwords.data.mapper
+
+import iv.vas.learnwords.domain.model.Word
+import iv.vas.learnwords.data.database.model.WordDbModel
+import iv.vas.learnwords.data.database.model.Phonetic as DbPhonetic
+import iv.vas.learnwords.data.database.model.Meaning as DbMeaning
+import iv.vas.learnwords.data.database.model.Definition as DbDefinition
+import iv.vas.learnwords.domain.model.Phonetic as DomainPhonetic
+import iv.vas.learnwords.domain.model.Meaning as DomainMeaning
+import iv.vas.learnwords.domain.model.Definition as DomainDefinition
+
+fun Word.toWordDbModel(): WordDbModel {
+    return WordDbModel(
+        word = word,
+        phonetic = phonetic,
+        phonetics = phonetics.map { it.toDbPhonetic() },
+        meanings = meanings.map { it.toDbMeaning() }
+    )
+}
+
+private fun DomainPhonetic.toDbPhonetic(): DbPhonetic {
+    return DbPhonetic(
+        text = text,
+        audio = audio
+    )
+}
+
+private fun DomainMeaning.toDbMeaning(): DbMeaning {
+    return DbMeaning(
+        partOfSpeech = partOfSpeech,
+        definitions = definitions.map { it.toDbDefinition() }
+    )
+}
+
+private fun DomainDefinition.toDbDefinition(): DbDefinition {
+    return DbDefinition(
+        definition = definition,
+        example = example
+    )
+}
