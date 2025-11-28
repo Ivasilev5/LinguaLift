@@ -46,9 +46,12 @@ android {
 }
 
 dependencies {
-    implementation(project(":core-ui"))
     implementation(project(":feature:learnwords:navigation-impl"))
     implementation(project(":feature:learnwords:navigation-api"))
+    implementation(project(":feature:learnwords:data"))
+    implementation(project(":feature:learnwords:domain"))
+    implementation(project(":feature:learnwords:ui"))
+    implementation(project(":core-ui"))
     implementation(libs.splash.screen)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

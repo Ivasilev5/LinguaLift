@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.hilt.plugin)
     alias(libs.plugins.ksp)
 }
 
@@ -40,6 +42,7 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.bundles.hilt)
     ksp(libs.bundles.hilt.compiler)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -47,4 +50,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+}
+
+hilt {
+    enableAggregatingTask = false
 }

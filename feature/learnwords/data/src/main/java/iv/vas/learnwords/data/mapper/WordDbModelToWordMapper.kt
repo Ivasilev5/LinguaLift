@@ -5,18 +5,18 @@ import iv.vas.learnwords.domain.model.Word
 import iv.vas.learnwords.domain.model.Phonetic
 import iv.vas.learnwords.domain.model.Meaning
 import iv.vas.learnwords.domain.model.Definition
-import iv.vas.learnwords.data.database.model.Phonetic as DbPhonetic
-import iv.vas.learnwords.data.database.model.Meaning as DbMeaning
-import iv.vas.learnwords.data.database.model.Definition as DbDefinition
+import iv.vas.learnwords.data.database.model.PhoneticDb as DbPhonetic
+import iv.vas.learnwords.data.database.model.MeaningDb as DbMeaning
+import iv.vas.learnwords.data.database.model.DefinitionDb as DbDefinition
 
-fun WordDbModel.toWord(): Word {
-    return Word(
-        word = word,
-        phonetic = phonetic,
-        phonetics = phonetics.map { it.toDomainPhonetic() },
-        meanings = meanings.map { it.toDomainMeaning() }
-    )
-}
+//fun WordDbModel.toWord(): Word {
+//    return Word(
+//        word = word,
+//        phonetic = phonetic,
+//        phonetics = phonetics.map { it.toDomainPhonetic() },
+//        meanings = meanings.map { it.toDomainMeaning() }
+//    )
+//}
 
 private fun DbPhonetic.toDomainPhonetic(): Phonetic {
     return Phonetic(

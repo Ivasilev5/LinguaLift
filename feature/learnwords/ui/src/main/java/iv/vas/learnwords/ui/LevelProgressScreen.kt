@@ -17,46 +17,45 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import iv.vas.core_ui.theme.LinguaLiftTheme
-
-data class WordItem(
-    val word: String,
-    val isLearned: Boolean = false
-)
-
-private val sampleWords = listOf(
-    WordLearnItem("mother"),
-    WordLearnItem("day"),
-    WordLearnItem("you"),
-    WordLearnItem("get"),
-    WordLearnItem("put"),
-    WordLearnItem("race"),
-    WordLearnItem("start"),
-    WordLearnItem("finish"),
-    WordLearnItem("design")
-)
+import iv.vas.learnwords.domain.model.Word
+import iv.vas.learnwords.domain.usecase.learnwords.FakeUseCase
+import iv.vas.learnwords.ui.levelprogress.LevelProgressViewModel
 
 @Composable
 fun LevelProgressScreen(
     modifier: Modifier = Modifier,
-    levelName: String = "A1 Level",
-    remainingWords: Int = 20,
-    progressPercentage: Int = 80,
-    words: List<WordLearnItem> = sampleWords,
+    levelName: String,
+    viewModel: LevelProgressViewModel = hiltViewModel(),
     onCloseClicked: () -> Unit = {},
     onResetProgressClicked: () -> Unit = {},
     onLearnWordClicked: (String) -> Unit = {}
 ) {
+    val words by viewModel.words.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+
+    // Load words when level changes
+    LaunchedEffect(levelName) {
+        viewModel.loadWordsForLevel(levelName)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -70,7 +69,7 @@ fun LevelProgressScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = levelName,
+                text = "$levelName Level",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -105,20 +104,30 @@ fun LevelProgressScreen(
                 modifier = Modifier.padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "$remainingWords new words remaining",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    val remainingWords = viewModel.getRemainingWordsCount()
+                    val progressPercentage = viewModel.getProgressPercentage()
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "$remainingWords new words remaining",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-                Text(
-                    text = "$progressPercentage% complete",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "$progressPercentage% complete",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
 
@@ -152,15 +161,42 @@ fun LevelProgressScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(words) { wordItem ->
-                WordListItem(
-                    word = wordItem.word,
-                    onLearnClicked = { onLearnWordClicked(wordItem.word) }
+        when {
+            isLoading -> {
+                // Loading state for word list
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = MaterialTheme.colorScheme.primary
                 )
+            }
+            error != null -> {
+                Text(
+                    text = error ?: "Unknown error",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            words.isEmpty() -> {
+                Text(
+                    text = "No words found for this level",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+            else -> {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(words) { wordItem ->
+                        WordListItem(
+                            word = wordItem,
+                            onLearnClicked = { onLearnWordClicked(wordItem.word) }
+                        )
+                    }
+                }
             }
         }
     }
@@ -168,13 +204,16 @@ fun LevelProgressScreen(
 
 @Composable
 private fun WordListItem(
-    word: String,
+    word: Word,
     onLearnClicked: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = if (word.isLearned)
+                MaterialTheme.colorScheme.primaryContainer
+            else
+                MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -185,26 +224,50 @@ private fun WordListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = word,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium
-            )
-
-            Button(
-                onClick = onLearnClicked,
-                modifier = Modifier.height(36.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
+            Column {
                 Text(
-                    text = "Learn",
+                    text = word.word,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (word.isLearned)
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    else
+                        MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Medium
+                )
+                if (word.progress > 0 && word.progress < 100) {
+                    Text(
+                        text = "${word.progress}% learned",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (word.isLearned)
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (!word.isLearned) {
+                Button(
+                    onClick = onLearnClicked,
+                    modifier = Modifier.height(36.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Learn",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            } else {
+                Text(
+                    text = "✓ Learned",
                     style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -212,18 +275,18 @@ private fun WordListItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun LevelProgressLightPreview() {
-    LinguaLiftTheme(darkTheme = false) {
-        LevelProgressScreen()
-    }
-}
+ @Preview(showBackground = true)
+ @Composable
+ private fun LevelProgressLightPreview() {
+     LinguaLiftTheme(darkTheme = false) {
+         LevelProgressScreen(levelName = "")
+     }
+ }
 
-@Preview(showBackground = true)
-@Composable
-private fun LevelProgressDarkPreview() {
-    LinguaLiftTheme(darkTheme = true) {
-        LevelProgressScreen()
-    }
-}
+ @Preview(showBackground = true)
+ @Composable
+ private fun LevelProgressDarkPreview() {
+     LinguaLiftTheme(darkTheme = true) {
+         LevelProgressScreen(levelName = "")
+     }
+ }

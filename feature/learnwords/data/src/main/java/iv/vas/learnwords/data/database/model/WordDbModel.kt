@@ -1,25 +1,27 @@
 package iv.vas.learnwords.data.database.model
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 
 
 @Entity("words_table")
 data class WordDbModel(
+    @PrimaryKey
     val word : String,
     val phonetic : String?,
-    val phonetics: List<Phonetic>,
-    val meanings : List<Meaning>
+    val phonetics: List<PhoneticDb>,
+    val meanings : List<MeaningDb>
 
 )
-data class Phonetic(
+data class PhoneticDb(
     val text : String?,
     val audio : String
 )
-data class Meaning(
+data class MeaningDb(
     val partOfSpeech : String,
-    val definitions : List<Definition>
+    val definitions : List<DefinitionDb>
 )
-data class Definition(
+data class DefinitionDb(
     val definition : String,
     val example : String?
 )

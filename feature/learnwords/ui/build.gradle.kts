@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.plugin)
 }
 
 android {
@@ -34,7 +36,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":feature"))
+    implementation(project(":core"))
+    implementation(project(":feature:learnwords:domain"))
+    implementation(project(":feature:learnwords:data"))
     implementation(project(":core-ui"))
+    implementation(libs.bundles.hilt)
+    ksp(libs.bundles.hilt.compiler)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.androidx.core.ktx)
