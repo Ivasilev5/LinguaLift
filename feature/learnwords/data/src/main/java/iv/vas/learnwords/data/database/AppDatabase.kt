@@ -3,17 +3,10 @@ package iv.vas.learnwords.data.database
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import android.content.Context
-import iv.vas.learnwords.data.database.model.CefrWordEntity
 import iv.vas.learnwords.data.database.model.WordDbModel
 
-@Database(
-    entities = [CefrWordEntity::class, WordDbModel::class],
-    version = 3,
-    exportSchema = false
-)
-@TypeConverters(Converters::class)
+@Database(entities = [WordDbModel::class], version = 1, exportSchema = false)
 abstract class AppDatabase() : RoomDatabase() {
 
 
@@ -39,9 +32,7 @@ abstract class AppDatabase() : RoomDatabase() {
                      context.applicationContext,
                     AppDatabase::class.java,
                     DB_NAME
-                )
-                .fallbackToDestructiveMigration()
-                .build()
+                ).build()
                 INSTANCE = db
                 return db
             }

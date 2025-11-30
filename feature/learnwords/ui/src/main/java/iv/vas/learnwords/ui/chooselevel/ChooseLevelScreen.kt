@@ -1,5 +1,6 @@
 package iv.vas.learnwords.ui.chooselevel
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,17 +14,21 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,24 +37,30 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import iv.vas.core_ui.R
 import iv.vas.core_ui.theme.LinguaLiftTheme
 
 data class LanguageLevel(
     val level: String,
     val wordCount: String,
-    val levelIcon: Int
+    val levelIcon : Int
+)
+
+private val languageLevels = listOf(
+    LanguageLevel("A1", "1-100 words" , iv.vas.learnwords.ui.R.drawable.level_a1),
+    LanguageLevel("A2", "101 - 1k words", iv.vas.learnwords.ui.R.drawable.level_a2),
+    LanguageLevel("B1", "1k - 2k words", iv.vas.learnwords.ui.R.drawable.level_b1),
+    LanguageLevel("B2", "2k - 3k words", iv.vas.learnwords.ui.R.drawable.level_b2),
+    LanguageLevel("C1", "3k - 4k words", iv.vas.learnwords.ui.R.drawable.level_c1 )
 )
 
 @Composable
 fun ChooseLevelScreen(
     modifier: Modifier = Modifier,
-    viewModel: ChooseLevelViewModel = hiltViewModel(),
-    onContinueClicked: (String) -> Unit = {}
+    onLevelSelected: (List<LanguageLevel>) -> Unit = {},
+    onContinueClicked: () -> Unit = {}
 ) {
-    val selectedLevels by viewModel.selectedLevels.collectAsState()
-    val canContinue by viewModel.canContinue.collectAsState()
-    val availableLevels = viewModel.availableLevels
+    val selectedLevels = remember { mutableStateListOf<LanguageLevel>() }
 
     Column(
         modifier = modifier
@@ -75,32 +86,34 @@ fun ChooseLevelScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.weight(1f)
         ) {
-            items(availableLevels) { level ->
+            items(languageLevels) { level ->
                 LevelCard(
                     level = level,
                     isSelected = selectedLevels.contains(level),
                     onCheckedChange = { isChecked ->
-                        viewModel.toggleLevelSelection(level)
+                        if (isChecked) {
+                            selectedLevels.add(level)
+                        } else {
+                            selectedLevels.remove(level)
+                        }
                     }
                 )
             }
         }
-
         Button(
             onClick = {
-                viewModel.getSelectedLevelCode()?.let { levelCode ->
-                    onContinueClicked(levelCode)
-                }
+                onLevelSelected(selectedLevels.toList())
+                onContinueClicked()
             },
-            enabled = canContinue,
+            enabled = selectedLevels.isNotEmpty(),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp,),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface,
-                containerColor = if (canContinue)
+                containerColor = if (selectedLevels.isNotEmpty())
                     MaterialTheme.colorScheme.primary
                 else
                     MaterialTheme.colorScheme.surfaceVariant
@@ -176,19 +189,18 @@ private fun LevelCard(
     }
 }
 
-// Previews are disabled for now since they require ViewModel
-// @Preview(showBackground = true)
-// @Composable
-// private fun ChooseLevelScreenLightPreview() {
-//     LinguaLiftTheme(darkTheme = false) {
-//         ChooseLevelScreen()
-//     }
-// }
-//
-// @Preview(showBackground = true)
-// @Composable
-// private fun ChooseLevelScreenDarkPreview() {
-//     LinguaLiftTheme(darkTheme = true) {
-//         ChooseLevelScreen()
-//     }
-// }
+@Preview(showBackground = true)
+@Composable
+private fun ChooseLevelScreenLightPreview() {
+    LinguaLiftTheme(darkTheme = false) {
+        ChooseLevelScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ChooseLevelScreenDarkPreview() {
+    LinguaLiftTheme(darkTheme = true) {
+        ChooseLevelScreen()
+    }
+}

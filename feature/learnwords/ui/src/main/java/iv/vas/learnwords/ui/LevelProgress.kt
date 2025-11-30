@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import iv.vas.core_ui.theme.LinguaLiftTheme
 
-data class WordItem(
+data class WordLearnItem(
     val word: String,
     val isLearned: Boolean = false
 )
@@ -47,7 +47,7 @@ private val sampleWords = listOf(
 )
 
 @Composable
-fun LevelProgressScreen(
+fun LevelProgress(
     modifier: Modifier = Modifier,
     levelName: String = "A1 Level",
     remainingWords: Int = 20,
@@ -216,7 +216,7 @@ private fun WordListItem(
 @Composable
 private fun LevelProgressLightPreview() {
     LinguaLiftTheme(darkTheme = false) {
-        LevelProgressScreen()
+        LevelProgress()
     }
 }
 
@@ -224,6 +224,6 @@ private fun LevelProgressLightPreview() {
 @Composable
 private fun LevelProgressDarkPreview() {
     LinguaLiftTheme(darkTheme = true) {
-        LevelProgressScreen()
+        LevelProgress()
     }
 }

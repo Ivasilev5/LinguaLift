@@ -14,11 +14,13 @@ import iv.vas.learnwords.navigation.LearnWordsRoutes.LevelProgress
 import iv.vas.learnwords.navigation.LearnWordsRoutes.Onboarding
 import iv.vas.learnwords.navigation.LearnWordsRoutes.Splash
 import iv.vas.learnwords.ui.chooselevel.ChooseLevelScreen
+import iv.vas.learnwords.ui.chooselevel.LanguageLevel
 import iv.vas.learnwords.ui.LearnWordsScreen
-import iv.vas.learnwords.ui.LevelProgressScreen
-import iv.vas.learnwords.ui.levelprogress.LevelProgressViewModel
+import iv.vas.learnwords.ui.LevelProgress
+import iv.vas.learnwords.ui.WordToLearn
 import iv.vas.learnwords.ui.onboarding.OnBoardingScreen
 import iv.vas.learnwords.ui.onboarding.SplashScreen
+import javax.inject.Inject
 
 /**
  * Navigation graph for the LearnWords feature.
@@ -29,8 +31,7 @@ fun LearnWordsNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     navigationImpl: LearnWordsNavigationImpl = LearnWordsNavigationImpl(),
-    startDestination: LearnWordsRoutes = Splash,
-
+    startDestination: LearnWordsRoutes = Splash
 ) {
     // Set the nav controller in the navigation implementation
     navigationImpl.setNavController(navController)
@@ -62,10 +63,20 @@ fun LearnWordsNavGraph(
         composable<ChooseLevel> { backStackEntry ->
             val route = backStackEntry.toRoute<ChooseLevel>()
             ChooseLevelScreen(
-                onContinueClicked = { selectedLevelCode ->
-                    // Navigate to LevelProgress with the selected level
+
+                onLevelSelected = { selectedLevels ->
+                    // Navigate to LevelProgress with the first selected level
+                    val levelName = selectedLevels.firstOrNull()?.level ?: "A1 Level"
                     navigationImpl.navigateToLevelProgress(
-                        levelName = selectedLevelCode,
+                        levelName = levelName,
+                        remainingWords = 20,
+                        progressPercentage = 80
+                    )
+                },
+                onContinueClicked = {
+                    // Default navigation to A1 Level
+                    navigationImpl.navigateToLevelProgress(
+                        levelName = "A1 Level",
                         remainingWords = 20,
                         progressPercentage = 80
                     )
@@ -76,8 +87,10 @@ fun LearnWordsNavGraph(
         // Level Progress Screen
         composable<LevelProgress> { backStackEntry ->
             val route = backStackEntry.toRoute<LevelProgress>()
-            LevelProgressScreen(
+            LevelProgress(
                 levelName = route.levelName,
+                remainingWords = route.remainingWords,
+                progressPercentage = route.progressPercentage,
                 onCloseClicked = {
                     navigationImpl.navigateBack()
                 },
@@ -86,11 +99,11 @@ fun LearnWordsNavGraph(
                     // For now, just navigate back to choose level
                     navigationImpl.navigateToChooseLevel()
                 },
-                onLearnWordClicked = {word ->
+                onLearnWordClicked = { word ->
                     navigationImpl.navigateToLearnWords(
                         levelName = route.levelName,
                         word = word,
-                        phonetic = "" // Will be loaded from API
+                        phonetic = "['${word.firstOrNull()?.lowercase() ?: ""}...]" // Placeholder phonetic
                     )
                 }
             )
@@ -100,10 +113,17 @@ fun LearnWordsNavGraph(
         composable<LearnWords> { backStackEntry ->
             val route = backStackEntry.toRoute<LearnWords>()
             LearnWordsScreen(
-                level = route.levelName,
-                word = route.word,
-                onWordCompleted = {
-                    // Navigate back to level progress
+                word = WordToLearn(
+                    word = route.word,
+                    phonetic = route.phonetic
+                ),
+                levelName = route.levelName,
+                onKnowWord = {
+                    // Navigate back to level progress or to next word
+                    navigationImpl.navigateBack()
+                },
+                onLearnWord = {
+                    // Could show additional learning content or navigate to different screen
                     navigationImpl.navigateBack()
                 }
             )

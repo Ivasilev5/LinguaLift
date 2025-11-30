@@ -39,8 +39,7 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":feature:learnwords:data"))
-    implementation(project(":feature:learnwords:ui"))
+    implementation(project("::feature:learnwords:ui"))
     implementation(libs.bundles.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(project(":feature:learnwords:navigation-api"))
