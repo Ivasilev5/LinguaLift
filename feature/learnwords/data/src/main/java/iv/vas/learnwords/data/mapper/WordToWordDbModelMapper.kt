@@ -5,7 +5,6 @@ import iv.vas.learnwords.data.database.model.WordDbModel
 import iv.vas.learnwords.data.database.model.PhoneticDb as DbPhonetic
 import iv.vas.learnwords.data.database.model.MeaningDb as DbMeaning
 import iv.vas.learnwords.data.database.model.DefinitionDb as DbDefinition
-import iv.vas.learnwords.domain.model.Phonetic as DomainPhonetic
 import iv.vas.learnwords.domain.model.Meaning as DomainMeaning
 import iv.vas.learnwords.domain.model.Definition as DomainDefinition
 
@@ -18,12 +17,7 @@ import iv.vas.learnwords.domain.model.Definition as DomainDefinition
 //    )
 //}
 
-private fun DomainPhonetic.toDbPhonetic(): DbPhonetic {
-    return DbPhonetic(
-        text = text,
-        audio = audio
-    )
-}
+
 
 private fun DomainMeaning.toDbMeaning(): DbMeaning {
     return DbMeaning(

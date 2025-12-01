@@ -18,7 +18,10 @@ import javax.inject.Singleton
 @Singleton
 class LearnRepositoryImpl @Inject constructor(
     private val learnApiService: LearnApiService,
-    private val learnDao: LearnDao
+    private val learnDao: LearnDao,
+    private val phoneticDataProvider: PhoneticDataProvider,
+    private val exampleDataProvider: ExampleDataProvider,
+    private val definitionDataProvider: DefinitionDataProvider
 ) : LearnRepository {
 
     override suspend fun initWordsIfNeeded() {
@@ -121,26 +124,58 @@ class LearnRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getWordDetails(word: String): WordDetails {
-        return try {
+        // Check if word is in A1 level - use local data
+        val isA1Word = WordDataProvider.a1Words.contains(word.lowercase())
+
+        if (isA1Word) {
+            // Use local data for A1 words
+            val definition = definitionDataProvider.getDefinition(word)
+            val example = exampleDataProvider.getExample(word)
+            val phonetic = phoneticDataProvider.getPhonetic(word)
             val response = learnApiService.getWord(word)
-            if (response.isSuccessful) {
-                response.body()?.firstOrNull()?.toWordDetails() ?: throw Exception("Empty response")
-            } else {
-                throw Exception("API error: ${response.code()}")
+            var audio : String? = null
+            if (response.isSuccessful){
+                audio = response.body()?.firstOrNull()?.phonetics?.firstOrNull()?.audio
             }
-        } catch (e: Exception) {
-            // Return cached data if API fails
-            Log.d("getWordDetails", e.message.toString())
-            val cachedWord = learnDao.getWordByName(word)?.toDomain()
-            if (cachedWord != null) {
-                WordDetails(
-                    word = cachedWord.word,
-                    phonetic = cachedWord.phonetic,
-                    phonetics = emptyList(),
-                    meanings = emptyList()
+            return WordDetails(
+                word = word,
+                phonetic = phonetic,
+                audioUrl =  audio,
+                meanings = listOf(
+                    iv.vas.learnwords.domain.model.Meaning(
+                        partOfSpeech = "noun",
+                        definitions = listOf(
+                            iv.vas.learnwords.domain.model.Definition(
+                                definition = definition ?: "Definition not available",
+                                example = example
+                            )
+                        )
+                    )
                 )
-            } else {
-                throw e
+            )
+        } else {
+            // Use API for other levels
+            return try {
+                val response = learnApiService.getWord(word)
+                if (response.isSuccessful) {
+                    response.body()?.firstOrNull()?.toWordDetails() ?: throw Exception("Empty response")
+                } else {
+                    throw Exception("API error: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                // Return cached data if API fails
+                Log.d("getWordDetails", e.message.toString())
+                val cachedWord = learnDao.getWordByName(word)?.toDomain()
+                if (cachedWord != null) {
+                    WordDetails(
+                        word = cachedWord.word,
+                        phonetic = cachedWord.phonetic,
+                        audioUrl = "",
+                        meanings = emptyList()
+                    )
+                } else {
+                    throw e
+                }
             }
         }
     }

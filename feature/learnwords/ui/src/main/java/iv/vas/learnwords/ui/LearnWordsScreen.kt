@@ -53,6 +53,7 @@ fun LearnWordsScreen(
 ) {
     val currentWord by viewModel.currentWord.collectAsState()
     val definition by viewModel.definition.collectAsState()
+    val wordAudio by viewModel.wordAudio.collectAsState()
     val example by viewModel.example.collectAsState()
     val phonetic by viewModel.phonetic.collectAsState()
     val partOfSpeech by viewModel.partOfSpeech.collectAsState()
@@ -71,6 +72,12 @@ fun LearnWordsScreen(
     // Load the specific word details from API
     LaunchedEffect(word, level) {
         viewModel.loadWordByName(word, level)
+    }
+
+    LaunchedEffect(isCardFlipped.value) {
+        if (isCardFlipped.value){
+            viewModel.playWordAudio(wordAudio ?: "")
+        }
     }
 
     Column(

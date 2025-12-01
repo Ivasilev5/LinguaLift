@@ -41,17 +41,11 @@ fun WordApiModel.toWordDetails(): WordDetails {
     return WordDetails(
         word = word,
         phonetic = phonetic,
-        phonetics = phonetics.map { it.toDomain() },
+        audioUrl = phonetics.firstOrNull()?.audio ?: "",
         meanings = meanings.map { it.toDomain() }
     )
 }
 
-private fun iv.vas.learnwords.data.network.model.PhoneticApiModel.toDomain(): iv.vas.learnwords.domain.model.Phonetic {
-    return iv.vas.learnwords.domain.model.Phonetic(
-        text = text,
-        audio = audio ?: ""
-    )
-}
 
 private fun iv.vas.learnwords.data.network.model.MeaningApiModel.toDomain(): iv.vas.learnwords.domain.model.Meaning {
     return iv.vas.learnwords.domain.model.Meaning(

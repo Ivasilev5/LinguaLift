@@ -14,14 +14,10 @@ data class Word(
 data class WordDetails(
     val word: String,
     val phonetic: String?,
-    val phonetics: List<Phonetic>,
+    val audioUrl: String?,
     val meanings: List<Meaning>
 )
 
-data class Phonetic(
-    val text: String?,
-    val audio: String
-)
 
 data class Meaning(
     val partOfSpeech: String,

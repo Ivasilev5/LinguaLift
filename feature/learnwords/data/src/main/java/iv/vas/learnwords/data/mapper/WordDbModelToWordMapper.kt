@@ -2,7 +2,6 @@ package iv.vas.learnwords.data.mapper
 
 import iv.vas.learnwords.data.database.model.WordDbModel
 import iv.vas.learnwords.domain.model.Word
-import iv.vas.learnwords.domain.model.Phonetic
 import iv.vas.learnwords.domain.model.Meaning
 import iv.vas.learnwords.domain.model.Definition
 import iv.vas.learnwords.data.database.model.PhoneticDb as DbPhonetic
@@ -18,12 +17,7 @@ import iv.vas.learnwords.data.database.model.DefinitionDb as DbDefinition
 //    )
 //}
 
-private fun DbPhonetic.toDomainPhonetic(): Phonetic {
-    return Phonetic(
-        text = text,
-        audio = audio
-    )
-}
+
 
 private fun DbMeaning.toDomainMeaning(): Meaning {
     return Meaning(

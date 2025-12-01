@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import iv.vas.core_media.audio.AudioPlayer
 import iv.vas.learnwords.domain.model.Word
 import iv.vas.learnwords.domain.usecase.learnwords.GetWordDetailsUseCase
 import iv.vas.learnwords.domain.usecase.learnwords.LoadNextWordUseCase
@@ -29,6 +30,9 @@ class LearnWordsViewModel @Inject constructor(
     private val _definition = MutableStateFlow<String?>(null)
     val definition: StateFlow<String?> = _definition.asStateFlow()
 
+    private val _wordAudio = MutableStateFlow<String?>(null)
+    val wordAudio: StateFlow<String?> = _wordAudio.asStateFlow()
+
     private val _example = MutableStateFlow<String?>(null)
     val example: StateFlow<String?> = _example.asStateFlow()
 
@@ -46,6 +50,8 @@ class LearnWordsViewModel @Inject constructor(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    val audioPlayer = AudioPlayer()
 
     fun loadNextWord(level: String) {
         viewModelScope.launch {
@@ -116,9 +122,10 @@ class LearnWordsViewModel @Inject constructor(
                 _definition.value = firstDefinition?.definition
                 _example.value = firstDefinition?.example
                 _partOfSpeech.value = firstMeaning?.partOfSpeech?.replaceFirstChar { it.uppercase() }
+                _wordAudio.value = details.audioUrl
 
                 // Extract phonetic
-                _phonetic.value = details.phonetic ?: details.phonetics.firstOrNull()?.text
+                _phonetic.value = details.phonetic ?: ""
 
                 // Set progress from current word if available
                 _currentWord.value?.let { current ->
@@ -145,6 +152,9 @@ class LearnWordsViewModel @Inject constructor(
             }
         }
     }
+    fun playWordAudio(url : String){
+        audioPlayer.play(url)
+    }
 
     fun markLearned() {
         viewModelScope.launch {
@@ -164,5 +174,9 @@ class LearnWordsViewModel @Inject constructor(
 
     fun clearError() {
         _error.value = null
+    }
+
+    override fun onCleared() {
+        audioPlayer.stop()
     }
 }
